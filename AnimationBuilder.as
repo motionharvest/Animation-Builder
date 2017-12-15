@@ -21,27 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-/*
-	//for less consider these mixins
-	.m-keyframes(@name; @arguments) {
-		@-moz-keyframes @name {
-			@arguments();
-		}
-		@-webkit-keyframes @name {
-			@arguments();
-		}
-		@keyframes @name {
-	        	@arguments();
-	        }
-	}
 
-	.m-animation(@arguments) {
-		-webkit-animation: @arguments;
-		-moz-animation: @arguments;
-		animation: @arguments;
-	}
-
-*/
 package {
 
 	import flash.utils.*;
@@ -53,15 +33,13 @@ package {
 		private var animations:Object = {};
 		private var _targets:Object = {};
 		private var _this = undefined;
-		private var _precompiler = undefined;
 
 		/*
 			constructor
 		*/
-		public function AnimationBuilder(timeline, targets, precompiler:String = "scss") {
+		public function AnimationBuilder(timeline, targets) {
 			_this = timeline;
 			_targets = targets;
-			_precompiler = precompiler;
 		}
 
 		/*
@@ -214,30 +192,20 @@ package {
 
 
 			// Loop through added keyframes and compile the css properties we stored.
-			var reply;
-			if(_precompiler == "scss"){
-				reply = "@import \"bourbon\";\n";
-				reply += "@include keyframes("+keyframeName+"){\n"
-			}else if(_precompiler == "less"){
-				reply = ".m-keyframes("+keyframeName+"; {\n"
-			}
+			var reply = "@keyframes "+keyframeName+" {\n"
+
 
 			for(var i in animations[keyframeName].frames){
 				reply += "	" + frameToPerc(animations[keyframeName].frames, i) +" {\n";
 				reply += "		" + animations[keyframeName].frames[i].props.join("		");
-				if(_precompiler == "scss"){
-					reply += "		@include animation-timing-function(" + (animations[keyframeName].frames[i].ease || "linear") + ");\n";
-				}else if(_precompiler == "less"){
-					reply += "		animation-timing-function: " + (animations[keyframeName].frames[i].ease || "linear") + ";\n";
-				}
+				reply += "		animation-timing-function: " + (animations[keyframeName].frames[i].ease || "linear") + ";\n";
+
 				reply += "	}\n";
 			}
 
-			if(_precompiler == "scss"){
-				reply += "\n}";
-			}else if(_precompiler == "less"){
-				reply += "\n});";
-			}
+
+			reply += "\n}";
+
 
 			trace(reply);
 
@@ -245,21 +213,10 @@ package {
 			//delay the output of these 10 milliseconds for each frame (for big animations).
 			setTimeout(function(){
 				var implement;
-
-				if(_precompiler == "scss"){
-					implement = "#" + _targets[keyframeName].name + " {\n";
-					implement += "	@include animation(" + keyframeName + " " + animations[keyframeName].duration + "s infinite);\n";
-					implement += "	@include animation-delay(" + animations[keyframeName].delay + "s);\n"
-					implement += "}";
-				}else if(_precompiler == "less"){
-					implement = "#" + _targets[keyframeName].name + " {\n";
-					implement += "	.m-animation (" + keyframeName + " " + animations[keyframeName].duration + "s 1 "+animations[keyframeName].delay+"s);\n";
-					implement += "}";
-
-				}
-
-
-
+				implement = "#" + _targets[keyframeName].name + " {\n";
+				implement += "	animation: " + keyframeName + " " + animations[keyframeName].duration + "s infinite;\n";
+				implement += "	animation-delay: " + animations[keyframeName].delay + "s;\n"
+				implement += "}";
 				trace(implement);
 
 			}, animations[keyframeName].frames.length * 10);
