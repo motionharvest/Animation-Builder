@@ -101,30 +101,30 @@ package {
 			/*
 				um, ok, so this is outdated. it looks great and works for the limited scope, but I want to use a really simple
 				syntax and capture the object.transform.matrix properties.
-			
-			
+
+
 				I've added in the possiblity to generate a 3D Matrix Transform if you've transformed your elements
 				in 3d. I don't know if it's gonna work.
 			*/
 
 			//(a=0.8070220947265625, b=0.59051513671875, c=-0.59051513671875, d=0.8070220947265625, tx=290.95, ty=129.95)
-			
-			
-			
-			
+
+
+
+
 			if (_targets[keyframeName].transform.matrix3D) {
-				
+
 				var matrix3d = JSON.stringify(_targets[keyframeName].transform.matrix3D.rawData);
 				tmpKeyframe.props.push("transform: matrix3d("+ matrix3d.substr(1, matrix3d.length-2) +");\n");
 
-				
+
 			} else {
-				
+
 				var matrix = _targets[keyframeName].transform.matrix;
 				tmpKeyframe.props.push("transform: matrix("+ matrix.a +","+matrix.b+","+matrix.c+","+matrix.d+","+matrix.tx+","+matrix.ty+");\n");
-				
+
 			}
-			
+
 			if(properties){
 				for(var k in properties){
 					if(properties[k].indexOf("^") === -1){
@@ -149,13 +149,13 @@ package {
 				}
 			} //end if
 
-			
-			
+
+
 			//
 			animations[keyframeName].frames.push(tmpKeyframe);
 
 		}
-		
+
 		public function report():void {
 			//loop through all the animations and pipe them through report
 			for(var i in animations){
@@ -224,12 +224,12 @@ package {
 				var implement;
 
 				if(_precompiler == "scss"){
-					implement = "#" + keyframeName + " {\n";
+					implement = "#" + _targets[keyframeName].name + " {\n";
 					implement += "	@include animation(" + keyframeName + " " + animations[keyframeName].duration + "s infinite);\n";
 					implement += "	@include animation-delay(" + animations[keyframeName].delay + "s);\n"
 					implement += "}";
 				}else if(_precompiler == "less"){
-					implement = ".animate--" + keyframeName + " {\n";
+					implement = "#" + _targets[keyframeName].name + " {\n";
 					implement += "	.m-animation (" + keyframeName + " " + animations[keyframeName].duration + "s 1 "+animations[keyframeName].delay+"s);\n";
 					implement += "}";
 
